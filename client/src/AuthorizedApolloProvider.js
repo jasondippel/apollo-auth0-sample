@@ -38,6 +38,7 @@ const AuthorizedApolloProvider = ({ children }) => {
   const client = new ApolloClient({
     link,
     cache,
+    connectToDevTools: true,
   });
 
   return <ApolloProvider client={client}>{children}</ApolloProvider>;
