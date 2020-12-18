@@ -5,16 +5,11 @@ import {
   HttpLink,
   ApolloProvider,
 } from "@apollo/client";
-import { setContext } from "@apollo/client/link/context";
 import { useAuth0 } from "@auth0/auth0-react";
 
 const AuthorizedApolloProvider = ({ children }) => {
   const { isAuthenticated, getAccessTokenSilently } = useAuth0();
   const [bearerToken, setBearerToken] = useState("");
-  const cache = new InMemoryCache();
-  const httpLink = new HttpLink({
-    uri: "http://localhost:4000",
-  });
 
   useEffect(() => {
     const getToken = async () => {
@@ -24,22 +19,24 @@ const AuthorizedApolloProvider = ({ children }) => {
     getToken();
   }, [getAccessTokenSilently, isAuthenticated]);
 
-  // TODO: switch over to custom fetch
+  const customFetch = async (_, options) => {
+    const { operationName } = JSON.parse(options.body);
+    const newHeaders = { ...options.headers };
+    if (bearerToken) newHeaders.Authorization = `Bearer ${bearerToken}`;
 
-  const authLink = setContext((_, { headers, ...rest }) => {
-    if (!bearerToken) return { headers, ...rest };
-
-    return {
-      ...rest,
-      headers: {
-        ...headers,
-        authorization: `Bearer: ${bearerToken}`,
-      },
+    const modifiedOpetions = {
+      ...options,
+      headers: newHeaders,
     };
-  });
+    return fetch(`http://localhost:4000?operation=${operationName}`, modifiedOpetions);
+  };
 
+  const cache = new InMemoryCache();
+  const link = new HttpLink({
+    fetch: customFetch,
+  });
   const client = new ApolloClient({
-    link: authLink.concat(httpLink),
+    link,
     cache,
   });
 

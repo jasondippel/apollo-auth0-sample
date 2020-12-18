@@ -21,7 +21,7 @@ const PROTECTED_QUERY = gql`
 `;
 
 const App = () => {
-  const { isAuthenticated } = useAuth0();
+  const { isAuthenticated, loginWithRedirect, logout, isLoading } = useAuth0();
   const {
     data: publicData,
     loading: publicLoading,
@@ -33,19 +33,20 @@ const App = () => {
     refetch: protectedRefetch,
   } = useQuery(PROTECTED_QUERY);
 
+  if (isLoading) return <p>Loading...</p>
+
   return (
     <div>
       <p>Public response: { publicLoading ? 'Loading...' : <code>{JSON.stringify(publicData)}</code> }</p>
-      {/* TODO: display error if there is one */}
       <button onClick={() => publicRefetch()}>Run public query</button>
 
       <p>Protected response: { protectedLoading ? 'Loading...' : <code>{JSON.stringify(protectedData)}</code> }</p>
-      {/* TODO: display error if there is one */}
       <button onClick={() => protectedRefetch()}>Run protected query</button>
 
       <p>Authenticated? { isAuthenticated ? 'Yes' : 'No' } (Run protected query to authenticate)</p>
 
-      {/* TODO: add logout/login button */}
+      {!isAuthenticated && <button onClick={loginWithRedirect}>Login</button>}
+      {isAuthenticated && <button onClick={() => logout({ returnTo: window.location.origin })}>Logout</button>}
     </div>
   );
 }
