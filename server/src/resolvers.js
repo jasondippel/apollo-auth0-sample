@@ -8,6 +8,14 @@ const publicItems = [
   },
 ];
 
+const public2Items = [
+  {
+    id: 3,
+    name: 'item3',
+    type: 'public',
+  },
+];
+
 const protectedItems = [
   {
     id: 2,
@@ -20,6 +28,9 @@ const resolvers = {
   Query: {
     public() {
       return publicItems;
+    },
+    public_also() {
+      return public2Items;
     },
     protected(_, __, { auth }) {
       if (!auth.isAuthenticated) {

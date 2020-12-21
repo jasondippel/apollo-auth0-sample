@@ -9,6 +9,7 @@ const typeDefs = gql`
 
   type Query {
     public: [Item]!
+    public_also: [Item]!
     protected: [Item]!
   }
 `;
